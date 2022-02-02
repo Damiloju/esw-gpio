@@ -40,6 +40,9 @@
 #include "loggers_ext.h"
 #include "logger_fwrite.h"
 
+#include "em_cmu.h"
+#include "em_gpio.h"
+
 #include "loglevels.h"
 #define __MODUUL__ "main"
 #define __LOG_LEVEL__ (LOG_LEVEL_main & BASE_LOG_LEVEL)
@@ -48,6 +51,9 @@
 // Include the information header binary
 #include "incbin.h"
 INCBIN(Header, "header.bin");
+
+// // declare led one funtion
+void led_one();
 
 // Heartbeat thread, initialize GPIO and print heartbeat messages.
 void hp_loop()
