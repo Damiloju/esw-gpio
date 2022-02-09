@@ -1,0 +1,7 @@
+- Turn GPIO module on (by turning on the peripheral clock)
+- find out the port and pin number
+- configer GPIO module port and pin (as input)
+- confige GPIO module interrupts for this pin and port - enable this interrupt
+- configure NVIC for interrupts from GPIO module
+- implement GPIO IRQ Handler in software
+- create task to handle button interrupts
