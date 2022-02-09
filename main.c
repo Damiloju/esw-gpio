@@ -52,7 +52,7 @@
 #include "incbin.h"
 INCBIN(Header, "header.bin");
 
-// // declare led one funtion
+// declare led one funtion
 void led_one();
 
 // Heartbeat thread, initialize GPIO and print heartbeat messages.
@@ -67,7 +67,7 @@ void hp_loop()
     // Output mode is gpioModePushPull
     GPIO_PinModeSet(gpioPortB, 11, gpioModePushPull, 0);
 
-    // Create a thread.
+    // Create a thread/task.
     const osThreadAttr_t LED1_thread_attr = {.name = "LED1"};
     osThreadNew(led_one, NULL, &LED1_thread_attr);
 
