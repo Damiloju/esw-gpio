@@ -63,6 +63,7 @@ void button_loop();
 void initGPIOButton();
 void buttonIntEnable();
 osThreadId_t button_task_id;
+static const uint32_t buttonExtIntThreadFlag = 0x00000001;
 
 // Heartbeat thread, initialize GPIO and print heartbeat messages.
 void hp_loop()
@@ -184,7 +185,7 @@ void buttonIntEnable()
     GPIO_IntClear(ESWGPIO_EXTI_IF);
 
     NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-    NVIC_SetPriority(GPIO_EVEN_IROn, 3);
+    NVIC_SetPriority(GPIO_EVEN_IRQn, 3);
 
     GPIO_IntEnable(ESWGPIO_EXTI_IF);
 }
