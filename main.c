@@ -52,8 +52,17 @@
 #include "incbin.h"
 INCBIN(Header, "header.bin");
 
+#define ESWGPIO_EXTI_INDEX 4         // External interrupt number 4.
+#define ESWGPIO_EXTI_IF 0x00000010UL // Interrupt flag for external interrupt
+
 // declare led one funtion
 void led_one();
+void button_loop();
+
+// declare initGPIOButton funtion
+void initGPIOButton();
+void buttonIntEnable();
+osThreadId_t button_task_id;
 
 // Heartbeat thread, initialize GPIO and print heartbeat messages.
 void hp_loop()
@@ -67,9 +76,21 @@ void hp_loop()
     // Output mode is gpioModePushPull
     GPIO_PinModeSet(gpioPortB, 11, gpioModePushPull, 0);
 
+    // TODO Set up the pins for the Buttons ((gpioPortF ) is PF then number is 4 for first use of pinmode set).
+    GPIO_PinModeSet(gpioPortF, 4, gpioModeInputPullFilter, 1);
+
+    // Initialize GPIO interrupt for button
+    initGPIOButton();
+
     // Create a thread/task.
+    const osThreadAttr_t button_thread_attr = {.name = "button"};
+    button_task_id = osThreadNew(button_loop, NULL, &button_thread_attr);
+
+    // Enable button interrupt
+    buttonIntEnable();
+
     const osThreadAttr_t LED1_thread_attr = {.name = "LED1"};
-    osThreadNew(led_one, NULL, &LED1_thread_attr);
+    osThreadNew(button_loop, NULL, &LED1_thread_attr);
 
     // GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
     // GPIO_PinModeSet(gpioPortA, 5, gpioModePushPull, 0);
@@ -93,7 +114,18 @@ void led_one()
     }
 }
 
-// TODO Button interrupt thread.
+// button interrupt thread
+void button_loop(void *args)
+{
+    for (;;)
+    {
+        osThreadFlagsClear(buttonExtIntThreadFlag);
+        osThreadFlagsWait(buttonExtIntThreadFlag, osFlagsWaitAny, osWaitForever);
+
+        // do smt
+        info1("Button Interrupt toggled");
+    }
+}
 
 int logger_fwrite_boot(const char *ptr, int len)
 {
@@ -135,4 +167,42 @@ int main()
 
     for (;;)
         ;
+}
+
+// TODO Button interrupt thread.
+void initGPIOButton()
+{
+    GPIO_IntDisable(ESWGPIO_EXTI_IF); // Disable before config to avoid unwanted interrupt trigerring
+
+    GPIO_ExtIntConfig(gpioPortF, 4, ESWGPIO_EXTI_INDEX, false, true, false); //  port , pin, EXTI number, rising edge, falling edge enabled
+
+    GPIO_InputSenseSet(GPIO_INSENSE_INT, GPIO_INSENSE_INT);
+}
+
+void buttonIntEnable()
+{
+    GPIO_IntClear(ESWGPIO_EXTI_IF);
+
+    NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+    NVIC_SetPriority(GPIO_EVEN_IROn, 3);
+
+    GPIO_IntEnable(ESWGPIO_EXTI_IF);
+}
+
+void GPIO_EVEN_IRQHandler(void)
+{
+    // Get all pending and enabled interrupts.
+    uint32_t pending = GPIO_IntGetEnabled();
+
+    // Check if button interrupt is enabled
+    if (pending & ESWGPIO_EXTI_IF)
+    {
+        // clear interrupt flag.
+        GPIO_IntClear(ESWGPIO_EXTI_IF);
+
+        // Trigger button thread to resume.
+        osThreadFlagsSet(button_task_id, buttonExtIntThreadFlag);
+    }
+    else
+        ; // This was not a button interrupt.
 }
