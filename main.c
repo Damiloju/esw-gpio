@@ -1,11 +1,11 @@
 /**
- * @brief Example usage of GPIO peripheral. Three LEDs are toggled using 
- * GPIO functionality. A hardware-to-software interrupt is set up and 
+ * @brief Example usage of GPIO peripheral. Three LEDs are toggled using
+ * GPIO functionality. A hardware-to-software interrupt is set up and
  * triggered by a button switch.
  *
  * The tsb0 board has three LEDs (red, green, blue) connected to ports
  * PB11, PB12, PA5 respectively. The button switch is connected to port
- * PF4. LED and button locations (pin and port numbers) can be found from 
+ * PF4. LED and button locations (pin and port numbers) can be found from
  * the tsb0 board wiring schematics.
  *
  * EFR32 Application Note on GPIO
@@ -14,12 +14,12 @@
  * EFR32MG12 Wireless Gecko Reference Manual (GPIO p1105)
  * https://www.silabs.com/documents/public/reference-manuals/efr32xg12-rm.pdf
  *
- * GPIO API documentation 
+ * GPIO API documentation
  * https://docs.silabs.com/mcu/latest/efr32mg12/group-GPIO
- * 
+ *
  * ARM RTOS API
  * https://arm-software.github.io/CMSIS_5/RTOS2/html/group__CMSIS__RTOS.html
- * 
+ *
  * Copyright Thinnect Inc. 2019
  * Copyright ProLab TTÜ 2022
  * @license MIT
@@ -91,7 +91,7 @@ void hp_loop()
     buttonIntEnable();
 
     const osThreadAttr_t LED1_thread_attr = {.name = "LED1"};
-    osThreadNew(button_loop, NULL, &LED1_thread_attr);
+    osThreadNew(led_one, NULL, &LED1_thread_attr);
 
     // GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
     // GPIO_PinModeSet(gpioPortA, 5, gpioModePushPull, 0);
